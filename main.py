@@ -1,28 +1,37 @@
-import psycopg2
+import psycopg2 as pg
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
-from src.FSIDUtils import kwzToPPM
+from src.fsid import convertFSID, validateFSID
 
 api_key = open("api_key.txt", "r").read().strip()
 
 # db_password = open("password.txt", "r").read().strip()
-# db_conn = psycopg2.connect("host=localhost port=5432 dbname=flipnotes user=meta_import password = " + db_password)
+# db_conn = pg.connect("host=localhost port=5432 dbname=flipnotes user=meta_import password = " + db_password)
 
 app = Flask(__name__)
 api = Api(app)
 
 
-class kwz(Resource):
+class user(Resource):
     def get(self):
-        # Check for correct API key.
-        parser = reqparse.RequestParser()
-        parser.add_argument("key", required=True)
-        args = parser.parse_args()
+        arg_parser = reqparse.RequestParser()
+
+        arg_parser.add_argument("key", required=True)
+        arg_parser.add_argument("fsid", required=True)
+        arg_parser.add_argument("scope", required=True)
+
+        args = arg_parser.parse_args()
 
         if args["key"] == api_key:
-            # Key is valid, process request.
+            if validateFSID(args["fsid"]):
+                if args["scope"] == "flipnotes":
+                    # All arguments are valid, proceed with request.
 
-            return {"response": "hi"}
+                    print("worked")
+                else:
+                    return {"message": "Scope is invalid."}, 401
+            else:
+                return {"message": "FSID is invalid."}, 401
         else:
             return {"message": "API key is invalid or incorrect."}, 401
 
@@ -44,13 +53,21 @@ class kwz(Resource):
 class flipnote(Resource):
     def get(self):
         arg_parser = reqparse.RequestParser()
+
         arg_parser.add_argument("key", required=True)
+        arg_parser.add_argument("fsid", required=True)
+        arg_parser.add_argument("scope", required=True)
+
         args = arg_parser.parse_args()
 
         if args["key"] == api_key:
-            # Key is valid, process request.
+            if args["scope"] == "meta":
+                # Assuming the file name is correct for now
+                # All other arguments are valid, proceed with request.
 
-            return {"response": "hi"}
+                print("worked")
+            else:
+                return {"message": "Scope is invalid."}, 401
         else:
             return {"message": "API key is invalid or incorrect."}, 401
 
@@ -69,7 +86,7 @@ class flipnote(Resource):
     pass
 
 
-api.add_resource(kwz, "/kwz")
+api.add_resource(user, "/user")
 api.add_resource(flipnote, "/flipnote")
 
 if __name__ == "__main__":
