@@ -63,6 +63,7 @@ class flipnote(Resource):
         if args["key"] == api_key:
             if args["scope"] == "meta":
                 # Assuming the file name is correct for now
+                # TODO: regex for file name
                 # All other arguments are valid, proceed with request.
 
                 print("worked")

@@ -1,5 +1,6 @@
 .idea/
 src/__pycache__/
+__pycache__/
 
 src/meta-import/password.txt
 src/meta-import/files.txt

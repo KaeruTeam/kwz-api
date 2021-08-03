@@ -1,4 +1,3 @@
-requests
 psycopg2-binary
 flask
-flask_restful
+markupsafe
