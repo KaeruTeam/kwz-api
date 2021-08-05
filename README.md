@@ -1,6 +1,7 @@
 # api.kwz.pw
 
-The kwz.pw API is intended to be used for accessing metadata and file contents from the Flipnote Studio 3D DSi Library file set.
+The kwz.pw API is intended to be used for accessing metadata and file contents from the Flipnote Studio 3D DSi Library
+file set.
 
 # Features
 
@@ -29,7 +30,6 @@ $ flask run
 > $env:FLASK_APP = "main"
 > flask run
 ```
-
 
 # Usage (production)
 

@@ -1,12 +1,11 @@
 import re
-from sys import argv
 from textwrap import wrap
 
 
 # Converts KWZ format FSIDs to PPM format.
 # KWZ format FSIDs must be 18 or 20 characters. "" will be returned if the length is invalid.
 # If a PPM format FSID is used as the input, it will be returned without modification.
-def convertFSID(input_fsid):
+def ConvertKWZtoPPM(input_fsid):
     output_fsid = ""
 
     if len(input_fsid) > 16:
@@ -30,16 +29,12 @@ def convertFSID(input_fsid):
     return output_fsid
 
 
-def validateFSID(fsid):
+def VerifyFSID(fsid):
     if len(fsid) == 16:
         return re.match("[0159][0-9A-F]{15}", fsid) is not None
 
     elif len(fsid) == 18 or len(fsid) == 20:
-        return re.match("[0159][0-9A-F]{15}", convertFSID(fsid)) is not None
+        return re.match("[0159][0-9A-F]{15}", ConvertKWZtoPPM(fsid)) is not None
 
     else:
         return False
-
-
-if __name__ == "__main__":
-    print(convertFSID(argv[1]))
