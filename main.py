@@ -13,20 +13,39 @@ app = flask.Flask(__name__)
 
 # Return all flipnotes made by specified FSID as JSON data
 @app.route("/user/<fsid>/flipnotes")
-def flipnote_name_list(fsid):
-    sql_statement = "select row_to_json(t) from (select current_filename from meta where current_fsid = %s::text) t;"
-
+async def flipnote_name_list(fsid):
     fsid = str(fsid).strip()
 
     if flask.request.args.get("key") == api_key:
         if fsid_utils.ConvertKWZtoPPM(fsid):
-            cur = db_conn.cursor()
+            if flask.request.args.get("extra") == "True":
+                sql_statement = "select row_to_json(t) from (select " \
+                                "current_filename, current_fsid, current_username, " \
+                                "parent_filename, parent_fsid, parent_username, " \
+                                "root_filename, root_fsid, root_username, " \
+                                "modified_timestamp, created_timestamp " \
+                                "from meta where current_fsid = %s::text" \
+                                "order by modified_timestamp asc) t;"
 
-            cur.execute(sql_statement, fsid)
-            results = cur.fetchall()
+                cur = db_conn.cursor()
 
-            cur.close()
-            return results, 200
+                cur.execute(sql_statement, (fsid,))
+                results = cur.fetchall()
+
+                cur.close()
+                return str(results), 200
+            else:
+                sql_statement = "select row_to_json(t) from (select current_filename" \
+                                "from meta where current_fsid = %s::text) t;"
+
+                cur = db_conn.cursor()
+
+                cur.execute(sql_statement, (fsid,))
+                results = cur.fetchall()
+
+                cur.close()
+                return str(results), 200
+
         else:
             return {"message": "The specified FSID is invalid."}, 400
     else:
@@ -35,24 +54,26 @@ def flipnote_name_list(fsid):
 
 # Return all meta in the database for the given flipnote as JSON data
 @app.route("/flipnote/<filename>/meta")
-def flipnote_meta_list(filename):
-    sql_statement = "select row_to_json(t) from (select * from meta where current_filename = %s::text) t;"
-
+async def flipnote_meta_list(filename):
     filename = str(filename).strip()
 
     # Trim file extension if it exists
     if filename.endswith(".kwz"):
         filename = filename[:-4]
 
+    # Check for a valid API key
     if flask.request.args.get("key") == api_key:
-        if file_utils.VerifyFilename(filename):
+        # Verify the filename is valid
+        if file_utils.VerifyKWZFilename(filename):
+            sql_statement = "select row_to_json(t) from (select * from meta where current_filename = %s::text) t;"
+
             cur = db_conn.cursor()
 
-            cur.execute(sql_statement, filename)
+            cur.execute(sql_statement, (filename,))
             results = cur.fetchall()
 
             cur.close()
-            return results, 200
+            return str(results), 200
         else:
             return {"message": "The specified file name is invalid."}, 400
     else:

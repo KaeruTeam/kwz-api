@@ -29,6 +29,24 @@ def ConvertKWZtoPPM(input_fsid):
     return output_fsid
 
 
+# Converts PPM format FSIDs to KWZ format, without the first and optional last bytes.
+# The first byte appears to be useless, as all versions (00, 10, 12, 14) refer to the same user
+def ConvertPPMtoKWZ(input_fsid):
+    if len(input_fsid) == 16 and re.match("[0159][0-9A-F]{15}", input_fsid) is not None:
+        output_fsid = ""
+
+        # Invert the FSID then split into byte sized chunks
+        string_list = wrap(input_fsid[::-1], 2)
+
+        # Invert each byte and append to the output string
+        for i in range(len(string_list)):
+            output_fsid += string_list[i][::-1]
+
+        return output_fsid
+    else:
+        return ""
+
+
 def VerifyFSID(fsid):
     if len(fsid) == 16:
         return re.match("[0159][0-9A-F]{15}", fsid) is not None
