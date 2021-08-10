@@ -1,12 +1,19 @@
+# *********************************************
+# Copyright (C) 2021 Meemo <meemo4556@gmail.com> - All Rights Reserved
+#
+# Unauthorized copying of this file, via any medium is strictly prohibited
+#
+# Proprietary and confidential
+# *********************************************
+
 import flask
 import psycopg2 as pg
 import src.fsid as fsid_utils
 import src.files as file_utils
 
-api_key = open("api_key.txt", "r").read().strip()
+api_keys = open("api_key.txt", "r").read()
 
-db_password = open("password.txt", "r").read().strip()
-db_conn = pg.connect("host=localhost port=5432 dbname=flipnotes user=meta_import password = " + db_password)
+db_conn = pg.connect("host=localhost port=5432 dbname=flipnotes user=meta_import password = " + open("password.txt").read().strip())
 
 app = flask.Flask(__name__)
 
@@ -16,7 +23,7 @@ app = flask.Flask(__name__)
 async def flipnote_name_list(fsid):
     fsid = str(fsid).strip()
 
-    if flask.request.args.get("key") == api_key:
+    if flask.request.args.get("key").strip() in api_keys:
         if fsid_utils.ConvertKWZtoPPM(fsid):
             if flask.request.args.get("extra") == "True":
                 sql_statement = "select row_to_json(t) from (select " \
@@ -62,7 +69,7 @@ async def flipnote_meta_list(filename):
         filename = filename[:-4]
 
     # Check for a valid API key
-    if flask.request.args.get("key") == api_key:
+    if flask.request.args.get("key").strip() in api_keys:
         # Verify the filename is valid
         if file_utils.VerifyKWZFilename(filename):
             sql_statement = "select row_to_json(t) from (select * from meta where current_filename = %s::text) t;"

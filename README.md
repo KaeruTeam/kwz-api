@@ -1,38 +1,40 @@
 # api.kwz.pw
 
-The kwz.pw API is intended to be used for accessing metadata and file contents from the Flipnote Studio 3D DSi Library
-file set.
+![](https://forthebadge.com/images/badges/compatibility-betamax.svg)
+![](https://forthebadge.com/images/badges/mom-made-pizza-rolls.svg)
+
+The kwz.pw API is intended to be used for accessing metadata and file contents from my Flipnote Studio 3D DSi Library
+file set. The primary group using this will be Kaeru in Kaeru Gallery.
 
 # Features
 
 These are the current features for the API, documentation will be created when the scope of the project expands.
 
-`http://api.kwz.pw/user/{fsid}/flipnotes?key={api key}`
+`http://api.kwz.pw/user/{fsid}/flipnotes?key={api key}?extra={True|False}`
 
-Returns a JSON list of all flipnotes with the given FSID as current author ID.
+Returns a JSON object listing all flipnotes with the given FSID as current author ID.
 
 `http://api.kwz.pw/flipnote/{file name}/meta?key={api key}`
 
-# Usage (testing)
-
-`pip3 install -r requirements.txt`
-
-### Bash
-
- ```shell
-$ export FLASK_APP=main
-$ flask run
-```
-
-### Powershell
-
-```
-> $env:FLASK_APP = "main"
-> flask run
-```
+Returns a JSON object listing all metadata in the database for the given flipnote.
 
 # Usage (production)
 
-`pip3 install -r requirements.txt`
+```shell
+sudo apt install -y apache2 libapache2-mod-wsgi-py3 libpq-dev python3-dev
+python3 -m pip install -r requirements.txt
+```
 
 The rest to be written later.
+
+# Todo
+
+- Create a website for the API
+- Set up cloudflare on the website
+- Create proper documentation on the API
+- Make API key verification a cleaner and more secure process
+- Make file downloading require API key
+- Create a proper logging system
+- Move to django?
+- Move to another language for speed? Go?
+- Set up a system for requesting API keys
