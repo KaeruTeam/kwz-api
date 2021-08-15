@@ -13,7 +13,7 @@ import src.files as file_utils
 
 api_keys = open("api_key.txt", "r").read()
 
-db_conn = pg.connect("host=localhost port=5432 dbname=flipnotes user=meta_import password = " + open("password.txt").read().strip())
+db_conn = pg.connect("host=localhost port=5432 dbname=flipnotes user=meta_import password=" + open("password.txt").read().strip())
 
 app = flask.Flask(__name__)
 
@@ -28,7 +28,7 @@ async def flipnote_name_list(fsid):
             if flask.request.args.get("extra") == "True":
                 # Kaeru team extra options request:
                 # - Add current/parent/root filename/fsid/username
-                # - Add timestamps
+                # - Add created and modified timestamps
                 # - Sort ascending by modified timestamp
 
                 sql_statement = '''
