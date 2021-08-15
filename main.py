@@ -26,13 +26,20 @@ async def flipnote_name_list(fsid):
     if flask.request.args.get("key").strip() in api_keys:
         if fsid_utils.ConvertKWZtoPPM(fsid):
             if flask.request.args.get("extra") == "True":
-                sql_statement = "select row_to_json(t) from (select " \
-                                "current_filename, current_fsid, current_username, " \
-                                "parent_filename, parent_fsid, parent_username, " \
-                                "root_filename, root_fsid, root_username, " \
-                                "modified_timestamp, created_timestamp " \
-                                "from meta where current_fsid = %s::text" \
-                                "order by modified_timestamp asc) t;"
+                # Kaeru team extra options request:
+                # - Add current/parent/root filename/fsid/username
+                # - Add timestamps
+                # - Sort ascending by modified timestamp
+
+                sql_statement = '''
+                                select row_to_json(t) from (select
+                                current_filename, current_fsid, current_username,
+                                parent_filename, parent_fsid, parent_username,
+                                root_filename, root_fsid, root_username,
+                                modified_timestamp, created_timestamp
+                                from meta where current_fsid = %s::text
+                                order by modified_timestamp asc) t;
+                                '''
 
                 cur = db_conn.cursor()
 
@@ -42,8 +49,10 @@ async def flipnote_name_list(fsid):
                 cur.close()
                 return str(results), 200
             else:
-                sql_statement = "select row_to_json(t) from (select current_filename" \
-                                "from meta where current_fsid = %s::text) t;"
+                sql_statement = '''
+                                select row_to_json(t) from (select current_filename
+                                from meta where current_fsid = %s::text) t;
+                                '''
 
                 cur = db_conn.cursor()
 
@@ -72,7 +81,9 @@ async def flipnote_meta_list(filename):
     if flask.request.args.get("key").strip() in api_keys:
         # Verify the filename is valid
         if file_utils.VerifyKWZFilename(filename):
-            sql_statement = "select row_to_json(t) from (select * from meta where current_filename = %s::text) t;"
+            sql_statement = '''
+                            select row_to_json(t) from (select * from meta where current_filename = %s::text) t;
+                            '''
 
             cur = db_conn.cursor()
 

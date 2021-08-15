@@ -4,7 +4,7 @@
 ![](https://forthebadge.com/images/badges/mom-made-pizza-rolls.svg)
 
 The kwz.pw API is intended to be used for accessing metadata and file contents from my Flipnote Studio 3D DSi Library
-file set. The primary group using this will be Kaeru in Kaeru Gallery.
+file set.
 
 # Features
 
