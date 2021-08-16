@@ -21,7 +21,7 @@ Returns a JSON object listing all metadata in the database for the given flipnot
 # Usage (production)
 
 ```shell
-sudo apt install -y apache2 libapache2-mod-wsgi-py3 libpq-dev python3-dev
+sudo apt install -y build-essential python3-dev
 python3 -m pip install -r requirements.txt
 ```
 
@@ -29,8 +29,8 @@ The rest to be written later.
 
 # Todo
 
-- Create a website for the API
-- Set up cloudflare on the website
+- Expose API to the public
+- Create a proper website for the API
 - Create proper documentation on the API
 - Make API key verification a cleaner and more secure process
 - Make file downloading require API key
