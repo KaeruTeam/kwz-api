@@ -33,9 +33,9 @@ async def flipnote_name_list(fsid):
 
                 sql_statement = '''
                                 select row_to_json(t) from (select
-                                current_filename, current_fsid, current_username,
-                                parent_filename, parent_fsid, parent_username,
-                                root_filename, root_fsid, root_username,
+                                current_filename, current_fsid, current_fsid_ppm, current_username,
+                                parent_filename, parent_fsid, parent_fsid_ppm, parent_username,
+                                root_filename, root_fsid, root_fsid_ppm, root_username,
                                 modified_timestamp, created_timestamp
                                 from meta where current_fsid = %s::text
                                 order by modified_timestamp asc) t;
