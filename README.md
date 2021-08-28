@@ -6,9 +6,9 @@
 The kwz.pw API is intended to be used for accessing metadata and file contents from my Flipnote Studio 3D DSi Library
 file set.
 
-# Features
+# Endpoints
 
-These are the current features for the API, documentation will be created when the scope of the project expands.
+These are the current endpoints for the API, proper documentation will be created later.
 
 `http://api.kwz.pw/user/{fsid}/flipnotes?key={api key}?extra={True|False}`
 
@@ -18,23 +18,33 @@ Returns a JSON object listing all flipnotes with the given FSID as current autho
 
 Returns a JSON object listing all metadata in the database for the given flipnote.
 
-# Usage (production)
+# Setup
 
 ```shell
-sudo apt install -y build-essential python3-dev
+sudo apt install -y build-essential python3 python3-dev
 python3 -m pip install -r requirements.txt
 ```
 
-The rest to be written later.
+# Deployment
+
+```shell
+uwsgi uwsgi.ini
+```
 
 # Todo
 
+- Create proper documentation
+- Make file downloading available through the API
+- Create/set up a proper logging system
 - Expose API to the public
-- Create a proper website for the API
-- Create proper documentation on the API
-- Make API key verification a cleaner and more secure process
-- Make file downloading require API key
-- Create a proper logging system
+  - Create a proper website for the API
+    - Migrate away from kwz.pw?
+  - Set up a system for requesting API keys on website
+
+
+#### Tentative
+
 - Move to django?
-- Move to another language for speed? Go?
-- Set up a system for requesting API keys
+- Move to another language for speed? 
+  - Go?
+- Expand to Flipnote Studio 3D world flipnotes once set is available? 
