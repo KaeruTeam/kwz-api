@@ -6,14 +6,19 @@
 # Proprietary and confidential
 # *********************************************
 
+from os import path
 from json import loads, dumps
 
-from flask import Flask, request, make_response
+from flask import Flask, request, make_response, send_file
 from psycopg2 import connect
 
 from src.auth import VerifyAPIKey
 from src.files import VerifyKWZFilename
 from src.fsid import VerifyPPMFSID
+
+# The path to the flipnotes file directory
+# Path should be [files_path]/[fsids]/[files].[kwz|jpg]
+base_file_path = path.join("/home/meemo/dsi_library/")
 
 db_conn_string = "host=localhost port=5432 dbname=flipnotes user=api password=" + open("password.txt").read().strip()
 
@@ -49,7 +54,8 @@ async def FSIDFlipnotes(input_fsid):
             # Kaeru team extra options request:
             # - Add current/parent/root filename/fsid/username
             # - Add created and modified timestamps
-            # - Sort asc modified timestamp (also asc current filename for result consistency)
+            # - Sort asc modified timestamp
+            #   - also asc current filename for consistency
             # - Limiting results: count x, offset y
             # - Send number of results in an http header X-Total-Results
             if request.args.get("extra") == "True":
@@ -154,24 +160,46 @@ async def FlipnoteDownload(file_name, file_type):
     if VerifyAPIKey(api_key):
         if VerifyKWZFilename(file_name):
             cur = connect(db_conn_string).cursor()
-
-            # Verify the file exists by checking in the db, and grab FSID at the same time
             cur.execute('''select json_agg(t) from (
-                           select current_fsid_ppm from meta where current_filename = %s::text) t;''', (file_name,))
+                           select current_fsid_ppm from meta 
+                           where current_filename = %s::text) t;''', (file_name,))
             results = dumps(cur.fetchone())
             cur.close()
+            if results == "[null]":
+                response = make_response({"message": "The specified file does not exist."}, 404)
+                response.headers["Content-Type"] = "application/json"
 
-            print(results)
+                return response
+            else:
+                fsid = str(results[0][0])
+                print(fsid)  # debug
+                file_path = path.join(base_file_path, fsid, str(file_name + "." + file_type))
+                if file_type == "kwz":
+                    # Check that the file exists at the specified location
+                    # In case the database and filesystem are out of sync
+                    if path.isfile(file_path):
+                        return make_response(send_file(file_path), 200)
+                    else:
+                        response = make_response({"message": "The specified file does not exist."}, 404)
+                        response.headers["Content-Type"] = "application/json"
 
-            # if file_type == "kwz":
-            #     # Download KWZ
-            # elif file_type == "jpg":
-            #     # Download JPG
-            # else:
-            #     response = make_response({"message": "The specified file type is invalid."}, 400)
-            #     response.headers["Content-Type"] = "application/json"
-            #
-            #     return response
+                        return response
+
+                elif file_type == "jpg":
+                    # Check that the file exists at the specified location
+                    # In case the database and filesystem are out of sync
+                    if path.isfile(file_path):
+                        return make_response(send_file(file_path), 200)
+                    else:
+                        response = make_response({"message": "The specified file does not exist."}, 404)
+                        response.headers["Content-Type"] = "application/json"
+
+                        return response
+                else:
+                    response = make_response({"message": "The specified file type is not supported."}, 400)
+                    response.headers["Content-Type"] = "application/json"
+
+                    return response
         else:
             response = make_response({"message": "The specified file name is invalid."}, 400)
             response.headers["Content-Type"] = "application/json"
