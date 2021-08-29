@@ -6,8 +6,22 @@
 # Proprietary and confidential
 # *********************************************
 
-import re
+from re import compile
 from textwrap import wrap
+
+# Compile both regex, gives a minor performance increase.
+PPM = compile("[0159][0-9A-F]{15}")
+KWZ = compile("(00|10|12|14)[0-9A-F]{14}[0159][0-9A-F](00)?")
+
+
+# Verifies that the PPM format FSID is valid via regex
+def VerifyPPMFSID(input_fsid):
+    return PPM.match(input_fsid) is not None
+
+
+# Verifies that the KWZ format FSID is valid via regex
+def VerifyKWZFSID(input_fsid):
+    return KWZ.match(input_fsid) is not None
 
 
 # Converts KWZ format FSIDs to PPM format.
@@ -17,7 +31,7 @@ from textwrap import wrap
 def ConvertKWZtoPPM(input_fsid):
     output_fsid = ""
 
-    if re.match("[0159][0-9A-F]{15}(00)?", input_fsid) is not None:
+    if VerifyKWZ(input_fsid):
         # Trim the first byte of the FSID
         # FSIDs from KWZ files have an extra null(?) byte at the end, trim it if it exists
         if len(input_fsid) == 20:
@@ -42,9 +56,9 @@ def ConvertKWZtoPPM(input_fsid):
 # This returns the FSID with 00 as the leading byte by default
 # The trailing null byte is also included
 def ConvertPPMtoKWZ(input_fsid):
-    if len(input_fsid) == 16 and re.match("[0159][0-9A-F]{15}", input_fsid) is not None:
-        output_fsid = ""
+    output_fsid = ""
 
+    if VerifyPPM(input_fsid):
         # Invert the FSID then split into byte sized chunks
         string_list = wrap(input_fsid[::-1], 2)
 
@@ -52,15 +66,6 @@ def ConvertPPMtoKWZ(input_fsid):
         for i in range(len(string_list)):
             output_fsid += string_list[i][::-1]
 
-        return "00" + output_fsid + "00"
-    else:
-        return ""
+        output_fsid = "00" + output_fsid + "00"
 
-
-# Verifies that the FSID is
-def VerifyPPMFSID(input_fsid):
-    return re.match("[0159][0-9A-F]{15}", input_fsid) is not None
-
-
-def VerifyKWZFSID(input_fsid):
-    return re.match("(00|10|12|14)[0-9A-F]{14}[0159][0-9A-F](00)?", input_fsid) is not None
+    return output_fsid

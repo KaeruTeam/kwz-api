@@ -10,13 +10,13 @@ keys = []
 
 
 # Read API keys from the text file
-def loadKeys():
+def LoadKeys():
     global keys
     keys = open("api_key.txt").readlines()
 
 
 # Verifies that the API key is in the list
-def verifyAPIKey(input_key):
+def VerifyAPIKey(input_key):
     # Trim any whitespace just in case
     input_key = input_key.strip()
 
@@ -26,9 +26,9 @@ def verifyAPIKey(input_key):
         # Reload API keys list then check if the key is in the list again
         # This way API keys can be added on the fly without restarting
         # and IO is reduced since the file isn't loaded on every request
-        loadKeys()
+        LoadKeys()
         return input_key in keys is True
 
 
 # Loads keys on API startup so verifyKey() works immediately
-loadKeys()
+LoadKeys()

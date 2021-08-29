@@ -37,14 +37,13 @@ uwsgi uwsgi.ini
 - Make file downloading available through the API
 - Create/set up a proper logging system
 - Expose API to the public
-  - Create a proper website for the API
-    - Migrate away from kwz.pw?
-  - Set up a system for requesting API keys on website
-
+    - Create a proper website for the API
+        - Migrate away from kwz.pw?
+    - Set up a system for requesting API keys on website
 
 #### Tentative
 
 - Move to django?
-- Move to another language for speed? 
-  - Go?
+- Move to another language for speed?
+    - Go?
 - Expand to Flipnote Studio 3D world flipnotes once set is available? 
