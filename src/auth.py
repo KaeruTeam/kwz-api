@@ -17,8 +17,8 @@ def LoadKeys():
 
 # Verifies that the API key is in the list
 def VerifyAPIKey(input_key):
-    # Trim any whitespace just in case
-    input_key = input_key.strip()
+    # Adding the newline so that `input_key in keys` works
+    input_key = str(input_key) + "\n"
 
     if input_key in keys:
         return True

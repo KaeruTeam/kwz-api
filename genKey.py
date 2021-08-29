@@ -9,7 +9,7 @@
 from secrets import token_hex
 
 # Generates an API key which is immediately put in the key file and printed to the console
-# API keys are 16 hex bytes, but that can be changed in the future.
+# API keys are currently 16 bytes in hex format, but that can be easily changed in the future.
 
 key = token_hex(16)
 

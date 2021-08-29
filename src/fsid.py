@@ -31,7 +31,7 @@ def VerifyKWZFSID(input_fsid):
 def ConvertKWZtoPPM(input_fsid):
     output_fsid = ""
 
-    if VerifyKWZ(input_fsid):
+    if VerifyKWZFSID(input_fsid):
         # Trim the first byte of the FSID
         # FSIDs from KWZ files have an extra null(?) byte at the end, trim it if it exists
         if len(input_fsid) == 20:
@@ -58,7 +58,7 @@ def ConvertKWZtoPPM(input_fsid):
 def ConvertPPMtoKWZ(input_fsid):
     output_fsid = ""
 
-    if VerifyPPM(input_fsid):
+    if VerifyPPMFSID(input_fsid):
         # Invert the FSID then split into byte sized chunks
         string_list = wrap(input_fsid[::-1], 2)
 
