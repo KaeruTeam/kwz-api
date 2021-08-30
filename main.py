@@ -57,7 +57,7 @@ async def FSIDFlipnotes(input_fsid):
                                parent_filename, parent_fsid, parent_fsid_ppm, parent_username,
                                root_filename, root_fsid, root_fsid_ppm, root_username,
                                modified_timestamp, created_timestamp
-                               from meta where current_fsid_ppm = %s::text
+                               from meta where current_fsid_ppm = %s
                                order by modified_timestamp asc, current_filename asc
                                limit %s offset %s) t;''', (input_fsid, limit, offset))
                 results = dumps(cur.fetchone()[0], ensure_ascii=escapeUnicode)
@@ -72,7 +72,7 @@ async def FSIDFlipnotes(input_fsid):
                 cur = connect(db_conn_string).cursor()
                 cur.execute('''select json_agg(t) from (
                                select current_filename from meta 
-                               where current_fsid = %s::text) t;''', (input_fsid,))
+                               where current_fsid = %s) t;''', (input_fsid,))
                 results = dumps(cur.fetchone()[0], ensure_ascii=escapeUnicode)
                 cur.close()
 
@@ -80,7 +80,6 @@ async def FSIDFlipnotes(input_fsid):
                 response.headers["Content-Type"] = "application/json"
 
                 return response
-
         else:
             response = make_response({"message": "The specified FSID is invalid (does not match PPM FSID regex)."}, 400)
             response.headers["Content-Type"] = "application/json"
@@ -103,7 +102,9 @@ async def FlipnoteMeta(file_name):
     if limit is not None:
         limit = int(limit)
     else:
-        limit = 9999999999  # Arbitrarily high; no limit
+        # Arbitrarily high; no limit to result
+        # Setting to "all" had type errors with psycopg2
+        limit = 9999999999
 
     offset = request.args.get("offset")
     if offset is not None:
@@ -121,7 +122,7 @@ async def FlipnoteMeta(file_name):
         if VerifyKWZFilename(file_name):
             cur = connect(db_conn_string).cursor()
             cur.execute('''select json_agg(t) from (
-                           select * from meta where current_filename = %s::text
+                           select * from meta where current_filename = %s
                            limit %s offset %s) t;''', (file_name, limit, offset))
             results = dumps(cur.fetchone(), ensure_ascii=escapeUnicode)
             cur.close()
@@ -151,37 +152,22 @@ async def FlipnoteDownload(file_name, file_type):
 
     if VerifyAPIKey(api_key):
         if VerifyKWZFilename(file_name):
+            # Fetch FSID from DB
             cur = connect(db_conn_string).cursor()
             cur.execute('''select json_agg(t) from (
                            select current_fsid_ppm from meta 
-                           where current_filename = %s::text) t;''', (file_name,))
+                           where current_filename = %s) t;''', (file_name,))
             results = dumps(cur.fetchone())
             cur.close()
 
-            if results == "[null]":
-                response = make_response({"message": "The specified file does not exist."}, 404)
-                response.headers["Content-Type"] = "application/json"
+            if results != "[null]":
+                file_path = path.join(base_file_path, str(results[0][0]), str(file_name + "." + file_type))
 
-                return response
-            else:
-                fsid = str(results[0][0])
-                file_path = path.join(base_file_path, fsid, str(file_name + "." + file_type))
-
-                if file_type == "kwz":
-                    # Check that the file exists at the specified location
-                    # In case the database and filesystem are out of sync
-                    if path.isfile(file_path):
-                        return send_file(file_path, as_attachment=True)
-                    else:
-                        response = make_response({"message": "The specified file does not exist."}, 404)
-                        response.headers["Content-Type"] = "application/json"
-
-                        return response
-                elif file_type == "jpg":
-                    # Check that the file exists at the specified location
-                    # In case the database and filesystem are out of sync
-                    if path.isfile(file_path):
-                        return send_file(file_path, as_attachment=True)
+                # Check that the file exists at the specified location
+                # In case the database and filesystem are out of sync
+                if path.isfile(file_path):
+                    if file_type == "kwz" or file_type == "jpg":
+                        send_file(file_path, as_attachment=True)
                     else:
                         response = make_response({"message": "The specified file does not exist."}, 404)
                         response.headers["Content-Type"] = "application/json"
@@ -192,6 +178,11 @@ async def FlipnoteDownload(file_name, file_type):
                     response.headers["Content-Type"] = "application/json"
 
                     return response
+            else:
+                response = make_response({"message": "The specified file does not exist."}, 404)
+                response.headers["Content-Type"] = "application/json"
+
+                return response
         else:
             response = make_response({"message": "The specified file name is invalid."}, 400)
             response.headers["Content-Type"] = "application/json"
