@@ -1,11 +1,3 @@
-# *********************************************
-# Copyright (C) 2021 Meemo <meemo4556@gmail.com> - All Rights Reserved
-#
-# Unauthorized copying of this file, via any medium is strictly prohibited
-#
-# Proprietary and confidential
-# *********************************************
-
 from os import path
 from json import loads, dumps
 
@@ -17,7 +9,7 @@ from src.files import VerifyKWZFilename
 from src.fsid import VerifyPPMFSID
 
 # The path to the flipnotes file directory
-# Path should be [files_path]/[fsids]/[files].[kwz|jpg]
+# File structure should be [base_file_path]/[fsid]/[file].[kwz|jpg]
 base_file_path = path.join("/home/meemo/dsi_library/")
 
 db_conn_string = "host=localhost port=5432 dbname=flipnotes user=api password=" + open("password.txt").read().strip()
@@ -111,7 +103,7 @@ async def FlipnoteMeta(file_name):
     if limit is not None:
         limit = int(limit)
     else:
-        limit = 9999999999
+        limit = 9999999999  # Arbitrarily high; no limit
 
     offset = request.args.get("offset")
     if offset is not None:
@@ -134,7 +126,7 @@ async def FlipnoteMeta(file_name):
             results = dumps(cur.fetchone(), ensure_ascii=escapeUnicode)
             cur.close()
 
-            response = make_response(results, 200)
+            response = make_response(results[0], 200)
             response.headers["Content-Type"] = "application/json"
             response.headers["X-Total-Results"] = len(loads(results))
 
@@ -165,6 +157,7 @@ async def FlipnoteDownload(file_name, file_type):
                            where current_filename = %s::text) t;''', (file_name,))
             results = dumps(cur.fetchone())
             cur.close()
+
             if results == "[null]":
                 response = make_response({"message": "The specified file does not exist."}, 404)
                 response.headers["Content-Type"] = "application/json"
@@ -172,24 +165,23 @@ async def FlipnoteDownload(file_name, file_type):
                 return response
             else:
                 fsid = str(results[0][0])
-                print(fsid)  # debug
                 file_path = path.join(base_file_path, fsid, str(file_name + "." + file_type))
+
                 if file_type == "kwz":
                     # Check that the file exists at the specified location
                     # In case the database and filesystem are out of sync
                     if path.isfile(file_path):
-                        return make_response(send_file(file_path), 200)
+                        return send_file(file_path, as_attachment=True)
                     else:
                         response = make_response({"message": "The specified file does not exist."}, 404)
                         response.headers["Content-Type"] = "application/json"
 
                         return response
-
                 elif file_type == "jpg":
                     # Check that the file exists at the specified location
                     # In case the database and filesystem are out of sync
                     if path.isfile(file_path):
-                        return make_response(send_file(file_path), 200)
+                        return send_file(file_path, as_attachment=True)
                     else:
                         response = make_response({"message": "The specified file does not exist."}, 404)
                         response.headers["Content-Type"] = "application/json"
