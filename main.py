@@ -166,10 +166,12 @@ async def FlipnoteDownload(file_name, file_type):
                 # Check that the file exists at the specified location
                 # In case the database and filesystem are out of sync
                 if path.isfile(file_path):
+                    # Note: the thumbnail files could be deleted and instead be
+                    # extracted on the fly
                     if file_type == "kwz" or file_type == "jpg":
                         send_file(file_path, as_attachment=True)
                     else:
-                        response = make_response({"message": "The specified file does not exist."}, 404)
+                        response = make_response({"message": "The specified file does not exist in the filesystem."}, 404)
                         response.headers["Content-Type"] = "application/json"
 
                         return response
