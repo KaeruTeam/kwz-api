@@ -1,12 +1,6 @@
 .idea/
-.vscode/
-src/__pycache__/
 __pycache__/
-venv/
 log/
-
-src/meta-import/password.txt
-src/meta-import/files.txt
 
 password.txt
 api_key.txt
