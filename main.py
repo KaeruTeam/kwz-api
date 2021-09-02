@@ -151,11 +151,11 @@ async def FlipnoteDownload(file_name, file_type):
             cur.execute('''select json_agg(t) from (
                            select current_fsid_ppm from meta 
                            where current_filename = %s) t;''', (file_name,))
-            results = dumps(cur.fetchone())
+            results = dumps(cur.fetchone()[0])
             cur.close()
 
-            if results != "[null]":
-                file_path = path.join(base_file_path, str(results[0][0]), str(file_name + "." + file_type))
+            if results != "null":
+                file_path = path.join(base_file_path, str(results[0]), str(file_name + "." + file_type))
 
                 # Check that the file exists at the specified location
                 # In case the database and filesystem are out of sync
