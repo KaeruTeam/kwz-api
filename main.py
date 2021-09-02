@@ -17,6 +17,15 @@ db_conn_string = "host=localhost port=5432 dbname=flipnotes user=api password=" 
 app = Flask(__name__)
 
 
+# Generates a response for flask containing necessary headers.
+def MakeResponse(content, code):
+    response = make_response(content, code)
+    response.headers["Content-Type"] = "application/json"
+    response.headers["X-Total-Results"] = len(loads(content))
+
+    return response
+
+
 # Return all flipnotes made by specified FSID as JSON data
 @app.route("/user/<input_fsid>/flipnotes")
 async def FSIDFlipnotes(input_fsid):
@@ -63,13 +72,11 @@ async def FSIDFlipnotes(input_fsid):
                 results = dumps(cur.fetchone()[0], ensure_ascii=escapeUnicode)
                 cur.close()
 
-                print(type(results))
-
-                response = make_response(results, 200)
-                response.headers["Content-Type"] = "application/json"
-                response.headers["X-Total-Results"] = len(loads(results))
-
-                return response
+                # Check if there are any results
+                if results != "null":
+                    return MakeResponse(results, 200)
+                else:
+                    return MakeResponse({"error": "Your request did not produce any results."}, 404)
             else:
                 cur = connect(db_conn_string).cursor()
                 cur.execute('''select json_agg(t) from (
@@ -78,20 +85,15 @@ async def FSIDFlipnotes(input_fsid):
                 results = dumps(cur.fetchone()[0], ensure_ascii=escapeUnicode)
                 cur.close()
 
-                response = make_response(results, 200)
-                response.headers["Content-Type"] = "application/json"
-
-                return response
+                # Check if there are any results
+                if results != "null":
+                    return MakeResponse(results, 200)
+                else:
+                    return MakeResponse({"error": "Your request did not produce any results."}, 404)
         else:
-            response = make_response({"message": "The specified FSID is invalid (does not match PPM FSID regex)."}, 400)
-            response.headers["Content-Type"] = "application/json"
-
-            return response
+            return MakeResponse({"error": "The specified FSID is invalid."}, 400)
     else:
-        response = make_response({"message": "The specified API key is invalid or incorrect."}, 401)
-        response.headers["Content-Type"] = "application/json"
-
-        return response
+        return MakeResponse({"error": "The specified API key is invalid or incorrect."}, 401)
 
 
 # Return all meta in the database for the given flipnote as JSON data
@@ -126,24 +128,14 @@ async def FlipnoteMeta(file_name):
             cur.execute('''select json_agg(t) from (
                            select * from meta where current_filename = %s
                            limit %s offset %s) t;''', (file_name, limit, offset))
-            results = dumps(cur.fetchone(), ensure_ascii=escapeUnicode)
+            results = dumps(cur.fetchone()[0], ensure_ascii=escapeUnicode)
             cur.close()
 
-            response = make_response(results[0], 200)
-            response.headers["Content-Type"] = "application/json"
-            response.headers["X-Total-Results"] = len(loads(results))
-
-            return response
+            return MakeResponse(results, 200)
         else:
-            response = make_response({"message": "The specified file name is invalid."}, 400)
-            response.headers["Content-Type"] = "application/json"
-
-            return response
+            return MakeResponse({"error": "The specified file name is invalid."}, 400)
     else:
-        response = make_response({"message": "The specified API key is invalid or incorrect."}, 401)
-        response.headers["Content-Type"] = "application/json"
-
-        return response
+        return MakeResponse({"error": "The specified API key is invalid or incorrect."}, 401)
 
 
 @app.route("/flipnote/<file_name>/<file_type>")
@@ -173,27 +165,12 @@ async def FlipnoteDownload(file_name, file_type):
                     if file_type == "kwz" or file_type == "jpg":
                         send_file(file_path, as_attachment=True)
                     else:
-                        response = make_response({"message": "The specified file does not exist in the filesystem."}, 404)
-                        response.headers["Content-Type"] = "application/json"
-
-                        return response
+                        return MakeResponse({"error": "The requested file does not exist in the filesystem."}, 404)
                 else:
-                    response = make_response({"message": "The specified file type is not supported."}, 400)
-                    response.headers["Content-Type"] = "application/json"
-
-                    return response
+                    return MakeResponse({"error": "The specified file type is not supported."}, 400)
             else:
-                response = make_response({"message": "The specified file does not exist."}, 404)
-                response.headers["Content-Type"] = "application/json"
-
-                return response
+                return MakeResponse({"error": "The specified file does not exist."}, 404)
         else:
-            response = make_response({"message": "The specified file name is invalid."}, 400)
-            response.headers["Content-Type"] = "application/json"
-
-            return response
+            return MakeResponse({"error": "The specified file name is invalid."}, 400)
     else:
-        response = make_response({"message": "The specified API key is invalid or incorrect."}, 401)
-        response.headers["Content-Type"] = "application/json"
-
-        return response
+        return MakeResponse({"error": "The specified API key is invalid or incorrect."}, 401)
