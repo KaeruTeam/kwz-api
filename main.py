@@ -44,8 +44,8 @@ async def FSIDFlipnotes(input_fsid):
     else:
         offset = 0
 
-    escapeUnicode = request.args.get("escapeUnicode")
-    if escapeUnicode == "True":
+    escapeUnicode = request.args.get("escapeUnicode").lower()
+    if escapeUnicode == "true":
         escapeUnicode = True
     else:
         escapeUnicode = False
@@ -59,7 +59,7 @@ async def FSIDFlipnotes(input_fsid):
             #   - also asc current filename for consistency
             # - Limiting results: count x, offset y
             # - Send number of results in an http header X-Total-Results
-            if request.args.get("extra") == "True":
+            if request.args.get("extra").lower() == "true":
                 cur = connect(db_conn_string).cursor()
                 cur.execute('''select json_agg(t) from (select
                                current_filename, current_fsid, current_fsid_ppm, current_username,
@@ -116,8 +116,8 @@ async def FlipnoteMeta(file_name):
     else:
         offset = 0
 
-    escapeUnicode = request.args.get("escapeUnicode")
-    if escapeUnicode == "True":
+    escapeUnicode = request.args.get("escapeUnicode").lower()
+    if escapeUnicode == "true":
         escapeUnicode = True
     else:
         escapeUnicode = False
