@@ -21,7 +21,7 @@ app = Flask(__name__)
 def MakeResponse(content, code):
     response = make_response(content, code)
     response.headers["Content-Type"] = "application/json"
-    response.headers["X-Total-Results"] = len(loads(content))
+    response.headers["X-Total-Results"] = len(loads(dumps(content)))
 
     return response
 
