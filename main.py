@@ -79,8 +79,8 @@ async def FSIDFlipnotes(input_fsid):
                     return MakeResponse({"error": "Your request did not produce any results."}, 404)
             else:
                 cur = connect(db_conn_string).cursor()
-                cur.execute('''select json_agg(t) from (
-                               select current_filename from meta where current_fsid = %s 
+                cur.execute('''select json_agg(t) from (select 
+                               current_filename from meta where current_fsid_ppm = %s
                                limit %s offset %s) t;''', (input_fsid, limit, offset))
                 results = dumps(cur.fetchone()[0], ensure_ascii=escapeUnicode)
                 cur.close()
