@@ -63,6 +63,8 @@ async def FSIDFlipnotes(input_fsid):
                 results = dumps(cur.fetchone()[0], ensure_ascii=escapeUnicode)
                 cur.close()
 
+                print(type(results))
+
                 response = make_response(results, 200)
                 response.headers["Content-Type"] = "application/json"
                 response.headers["X-Total-Results"] = len(loads(results))
@@ -71,8 +73,8 @@ async def FSIDFlipnotes(input_fsid):
             else:
                 cur = connect(db_conn_string).cursor()
                 cur.execute('''select json_agg(t) from (
-                               select current_filename from meta 
-                               where current_fsid = %s) t;''', (input_fsid,))
+                               select current_filename from meta where current_fsid = %s 
+                               limit %s offset %s) t;''', (input_fsid, limit, offset))
                 results = dumps(cur.fetchone()[0], ensure_ascii=escapeUnicode)
                 cur.close()
 
