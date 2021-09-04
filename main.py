@@ -44,11 +44,11 @@ async def FSIDFlipnotes(input_fsid):
     else:
         offset = 0
 
-    escapeUnicode = request.args.get("escapeUnicode").lower()
-    if escapeUnicode == "true":
-        escapeUnicode = True
-    else:
+    escapeUnicode = request.args.get("escapeUnicode")
+    if escapeUnicode is None:
         escapeUnicode = False
+    else:
+        escapeUnicode = True
 
     if VerifyAPIKey(api_key):
         if VerifyPPMFSID(input_fsid):
@@ -113,11 +113,11 @@ async def FlipnoteMeta(file_name):
     else:
         offset = 0
 
-    escapeUnicode = request.args.get("escapeUnicode").lower()
-    if escapeUnicode == "true":
-        escapeUnicode = True
-    else:
+    escapeUnicode = request.args.get("escapeUnicode")
+    if escapeUnicode is None:
         escapeUnicode = False
+    else:
+        escapeUnicode = True
 
     if VerifyAPIKey(api_key):
         if VerifyKWZFilename(file_name):
