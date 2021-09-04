@@ -49,7 +49,7 @@ async def fsidFlipnotes(input_fsid):
     else:
         escapeUnicode = True
 
-    if VerifyAPIKey(api_key):
+    if verifyAPIKey(api_key):
         if Flipnote.verifyPPMFSID(input_fsid):
             # Kaeru team extra options request:
             # - Add current/parent/root filename/fsid/username
@@ -140,7 +140,7 @@ async def flipnoteDownload(file_name, file_type):
     file_type = str(file_type).strip()
     api_key = request.args.get("key").strip()
 
-    if VerifyAPIKey(api_key):
+    if verifyAPIKey(api_key):
         if Flipnote.verifyKWZFilename(file_name):
             # Fetch FSID from DB
             cur = connect(db_conn_string).cursor()
