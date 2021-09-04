@@ -4,9 +4,8 @@ from json import loads, dumps
 from flask import Flask, request, make_response, send_file
 from psycopg2 import connect
 
+from src.flipnote import Flipnote
 from src.auth import VerifyAPIKey
-from src.files import VerifyKWZFilename
-from src.fsid import VerifyPPMFSID
 
 # The path to the flipnotes file directory
 # File structure should be [base_file_path]/[fsid]/[file].[kwz|jpg]
@@ -18,7 +17,7 @@ app = Flask(__name__)
 
 
 # Generates a response for flask containing necessary headers.
-def MakeResponse(content, code):
+def makeResponse(content, code):
     response = make_response(content, code)
     response.headers["Content-Type"] = "application/json"
     response.headers["X-Total-Results"] = len(loads(dumps(content)))
@@ -28,7 +27,7 @@ def MakeResponse(content, code):
 
 # Return all flipnotes made by specified FSID as JSON data
 @app.route("/user/<input_fsid>/flipnotes")
-async def FSIDFlipnotes(input_fsid):
+async def fsidFlipnotes(input_fsid):
     input_fsid = str(input_fsid).strip()
     api_key = request.args.get("key").strip()
 
@@ -51,7 +50,7 @@ async def FSIDFlipnotes(input_fsid):
         escapeUnicode = True
 
     if VerifyAPIKey(api_key):
-        if VerifyPPMFSID(input_fsid):
+        if Flipnote.verifyPPMFSID(input_fsid):
             # Kaeru team extra options request:
             # - Add current/parent/root filename/fsid/username
             # - Add created and modified timestamps
@@ -72,9 +71,9 @@ async def FSIDFlipnotes(input_fsid):
                 cur.close()
 
                 if results != "null":
-                    return MakeResponse(results, 200)
+                    return makeResponse(results, 200)
                 else:
-                    return MakeResponse({"error": "Your request did not produce any results."}, 404)
+                    return makeResponse({"error": "Your request did not produce any results."}, 404)
             else:
                 cur = connect(db_conn_string).cursor()
                 cur.execute('''select json_agg(t) from (select 
@@ -84,18 +83,18 @@ async def FSIDFlipnotes(input_fsid):
                 cur.close()
 
                 if results != "null":
-                    return MakeResponse(results, 200)
+                    return makeResponse(results, 200)
                 else:
-                    return MakeResponse({"error": "Your request did not produce any results."}, 404)
+                    return makeResponse({"error": "Your request did not produce any results."}, 404)
         else:
-            return MakeResponse({"error": "The specified FSID is invalid."}, 400)
+            return makeResponse({"error": "The specified FSID is invalid."}, 400)
     else:
-        return MakeResponse({"error": "The specified API key is invalid or incorrect."}, 401)
+        return makeResponse({"error": "The specified API key is invalid or incorrect."}, 401)
 
 
 # Return all meta in the database for the given flipnote as JSON data
 @app.route("/flipnote/<file_name>/meta")
-async def FlipnoteMeta(file_name):
+async def flipnoteMeta(file_name):
     file_name = str(file_name).strip()
     api_key = request.args.get("key").strip()
 
@@ -120,7 +119,7 @@ async def FlipnoteMeta(file_name):
         escapeUnicode = True
 
     if VerifyAPIKey(api_key):
-        if VerifyKWZFilename(file_name):
+        if Flipnote.verifyKWZFilename(file_name):
             cur = connect(db_conn_string).cursor()
             cur.execute('''select json_agg(t) from (
                            select * from meta where current_filename = %s
@@ -128,21 +127,21 @@ async def FlipnoteMeta(file_name):
             results = dumps(cur.fetchone()[0], ensure_ascii=escapeUnicode)
             cur.close()
 
-            return MakeResponse(results, 200)
+            return makeResponse(results, 200)
         else:
-            return MakeResponse({"error": "The specified file name is invalid."}, 400)
+            return makeResponse({"error": "The specified file name is invalid."}, 400)
     else:
-        return MakeResponse({"error": "The specified API key is invalid or incorrect."}, 401)
+        return makeResponse({"error": "The specified API key is invalid or incorrect."}, 401)
 
 
 @app.route("/flipnote/<file_name>/<file_type>")
-async def FlipnoteDownload(file_name, file_type):
+async def flipnoteDownload(file_name, file_type):
     file_name = str(file_name).strip()
     file_type = str(file_type).strip()
     api_key = request.args.get("key").strip()
 
     if VerifyAPIKey(api_key):
-        if VerifyKWZFilename(file_name):
+        if Flipnote.verifyKWZFilename(file_name):
             # Fetch FSID from DB
             cur = connect(db_conn_string).cursor()
             cur.execute('''select json_agg(t) from (
@@ -162,12 +161,12 @@ async def FlipnoteDownload(file_name, file_type):
                     if file_type == "kwz" or file_type == "jpg":
                         send_file(file_path, as_attachment=True)
                     else:
-                        return MakeResponse({"error": "The requested file does not exist in the filesystem."}, 404)
+                        return makeResponse({"error": "The requested file does not exist in the filesystem."}, 404)
                 else:
-                    return MakeResponse({"error": "The specified file type is not supported."}, 400)
+                    return makeResponse({"error": "The specified file type is not supported."}, 400)
             else:
-                return MakeResponse({"error": "The specified file does not exist."}, 404)
+                return makeResponse({"error": "The specified file does not exist."}, 404)
         else:
-            return MakeResponse({"error": "The specified file name is invalid."}, 400)
+            return makeResponse({"error": "The specified file name is invalid."}, 400)
     else:
-        return MakeResponse({"error": "The specified API key is invalid or incorrect."}, 401)
+        return makeResponse({"error": "The specified API key is invalid or incorrect."}, 401)

@@ -1,10 +1,22 @@
+from os import path
+from secrets import token_hex
+
 keys = []
+
+# Assuming this file is in src/ and the api key file is in ../api.key.txt
+key_file_dir = path.join("../api_key.txt")
+
+
+# Writes the given key to the key file
+def WriteKey(key):
+    with open(key_file_dir, "a") as file:
+        file.write(str(key) + "\n")
 
 
 # Read API keys from the text file
 def LoadKeys():
     global keys
-    keys = open("api_key.txt").readlines()
+    keys = open(key_file_dir, "r").readlines()
 
 
 # Verifies that the API key is in the list
@@ -22,5 +34,12 @@ def VerifyAPIKey(input_key):
         return input_key in keys is True
 
 
-# Loads keys on API startup so verifyKey() works immediately
-LoadKeys()
+if __name__ == "__main__":
+    # Generates an API key which is immediately put in the key file and printed to the console
+    # API keys are currently 16 bytes in hex format, but that can be easily changed in the future.
+    new_key = token_hex(16)
+    print(new_key)
+    WriteKey(new_key)
+else:
+    # Loads keys on API startup so verifyKey() works immediately
+    LoadKeys()
