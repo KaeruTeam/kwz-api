@@ -1,10 +1,10 @@
-from os import path
+from os import path, getcwd
 from secrets import token_hex
 
 keys = []
 
 # Assuming this file is in src/ and the api key file is in ../api.key.txt
-key_file_dir = path.join("../api_key.txt")
+key_file_dir = path.join(getcwd(), "..", "api_key.txt")
 
 
 # Writes the given key to the key file
