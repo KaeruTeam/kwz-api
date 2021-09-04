@@ -66,7 +66,7 @@ async def FSIDFlipnotes(input_fsid):
                                parent_filename, parent_fsid, parent_fsid_ppm, parent_username,
                                root_filename, root_fsid, root_fsid_ppm, root_username, timestamp
                                from meta where current_fsid_ppm = %s
-                               order by modified_timestamp asc, current_filename asc
+                               order by timestamp asc, current_filename asc
                                limit %s offset %s) t;''', (input_fsid, limit, offset))
                 results = dumps(cur.fetchone()[0], ensure_ascii=escapeUnicode)
                 cur.close()
