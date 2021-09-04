@@ -12,7 +12,7 @@ The API is designed and tested to be run on Debian 10+ and Python 3.7+. Other pl
 To install all requirements, run:
 
 ```shell
-sudo apt install -y build-essential python3 python3-dev
+sudo apt install -y build-essential python3 python3-dev postgresql
 python3 -m pip install -r requirements.txt
 ```
 
@@ -31,4 +31,4 @@ uwsgi uwsgi.ini
 - Move to django?
 - Move to another language for speed?
     - Go?
-    - JS (for flipnote.js)?
+    - JS (to use flipnote.js)?

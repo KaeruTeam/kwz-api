@@ -64,15 +64,13 @@ async def FSIDFlipnotes(input_fsid):
                 cur.execute('''select json_agg(t) from (select
                                current_filename, current_fsid, current_fsid_ppm, current_username,
                                parent_filename, parent_fsid, parent_fsid_ppm, parent_username,
-                               root_filename, root_fsid, root_fsid_ppm, root_username,
-                               modified_timestamp, created_timestamp
+                               root_filename, root_fsid, root_fsid_ppm, root_username, timestamp
                                from meta where current_fsid_ppm = %s
                                order by modified_timestamp asc, current_filename asc
                                limit %s offset %s) t;''', (input_fsid, limit, offset))
                 results = dumps(cur.fetchone()[0], ensure_ascii=escapeUnicode)
                 cur.close()
 
-                # Check if there are any results
                 if results != "null":
                     return MakeResponse(results, 200)
                 else:
@@ -85,7 +83,6 @@ async def FSIDFlipnotes(input_fsid):
                 results = dumps(cur.fetchone()[0], ensure_ascii=escapeUnicode)
                 cur.close()
 
-                # Check if there are any results
                 if results != "null":
                     return MakeResponse(results, 200)
                 else:
