@@ -5,7 +5,7 @@ from flask import Flask, request, make_response, send_file
 from psycopg2 import connect
 
 from src.flipnote import Flipnote
-from src.auth import VerifyAPIKey
+from src.auth import verifyAPIKey
 
 # The path to the flipnotes file directory
 # File structure should be [base_file_path]/[fsid]/[file].[kwz|jpg]
