@@ -9,12 +9,9 @@ from flipnote import schema
 # The path to the flipnotes file directory
 # File structure should be [base_file_path]/[fsid]/[file].[kwz|jpg]
 base_file_path = path.join("/home/meemo/dsi_library/")
-
 db_conn_string = "host=localhost port=5432 dbname=flipnotes user=api password=" + open("password.txt").read().strip()
-
-app = Flask(__name__)
-
 keys = []
+app = Flask(__name__)
 
 
 # Read API keys from the text file
@@ -34,7 +31,7 @@ def verifyAPIKey(input_key):
         # Reload API keys list then check if the key is in the list again
         # This way API keys can be added on the fly without restarting
         # and IO is reduced since the file isn't loaded on every request
-        loadKeys()
+        loadAPIKeys()
         return input_key in keys is True
 
 
@@ -169,11 +166,11 @@ async def flipnoteDownload(file_name, file_type):
             cur.execute('''select json_agg(t) from (
                            select current_fsid_ppm from meta 
                            where current_filename = %s) t;''', (file_name,))
-            results = dumps(cur.fetchone()[0])
+            results = cur.fetchone()
             cur.close()
 
-            if results != "null":
-                file_path = path.join(base_file_path, str(results[0]), str(file_name + "." + file_type))
+            if results is not None:
+                file_path = path.join(base_file_path, results[0][0]["current_fsid_ppm"], str(file_name + "." + file_type))
 
                 # Check that the file exists at the specified location
                 # In case the database and filesystem are out of sync
@@ -181,7 +178,7 @@ async def flipnoteDownload(file_name, file_type):
                     # Note: the thumbnail files could be deleted and instead be
                     # extracted on the fly
                     if file_type == "kwz" or file_type == "jpg":
-                        send_file(file_path, as_attachment=True)
+                        return send_file(file_path, as_attachment=True), 200
                     else:
                         return makeResponse({"error": "The requested file does not exist in the filesystem."}, 404)
                 else:
