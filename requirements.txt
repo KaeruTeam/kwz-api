@@ -1,3 +1,4 @@
 psycopg2
 flask[async]
 uwsgi
+flipnote==0.0.5

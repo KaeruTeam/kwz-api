@@ -4,8 +4,7 @@ from json import loads, dumps
 from flask import Flask, request, make_response, send_file
 from psycopg2 import connect
 
-from src.flipnote import Flipnote
-from src.auth import verifyAPIKey
+from flipnote import schema
 
 # The path to the flipnotes file directory
 # File structure should be [base_file_path]/[fsid]/[file].[kwz|jpg]
@@ -14,6 +13,29 @@ base_file_path = path.join("/home/meemo/dsi_library/")
 db_conn_string = "host=localhost port=5432 dbname=flipnotes user=api password=" + open("password.txt").read().strip()
 
 app = Flask(__name__)
+
+keys = []
+
+
+# Read API keys from the text file
+def loadAPIKeys():
+    global keys
+    keys = open("api_key.txt", "r").readlines()
+
+
+# Verifies that the API key is in the list
+def verifyAPIKey(input_key):
+    # Adding the newline so that `input_key in keys` works
+    input_key = str(input_key) + "\n"
+
+    if input_key in keys:
+        return True
+    else:
+        # Reload API keys list then check if the key is in the list again
+        # This way API keys can be added on the fly without restarting
+        # and IO is reduced since the file isn't loaded on every request
+        loadKeys()
+        return input_key in keys is True
 
 
 # Generates a response for flask containing necessary headers.
@@ -50,7 +72,7 @@ async def fsidFlipnotes(input_fsid):
         escapeUnicode = True
 
     if verifyAPIKey(api_key):
-        if Flipnote.verifyPPMFSID(input_fsid):
+        if schema.verifyPPMFSID(input_fsid):
             # Kaeru team extra options request:
             # - Add current/parent/root filename/fsid/username
             # - Add created and modified timestamps
@@ -118,8 +140,8 @@ async def flipnoteMeta(file_name):
     else:
         escapeUnicode = True
 
-    if VerifyAPIKey(api_key):
-        if Flipnote.verifyKWZFilename(file_name):
+    if verifyAPIKey(api_key):
+        if schema.verifyKWZFilename(file_name):
             cur = connect(db_conn_string).cursor()
             cur.execute('''select json_agg(t) from (
                            select * from meta where current_filename = %s
@@ -141,7 +163,7 @@ async def flipnoteDownload(file_name, file_type):
     api_key = request.args.get("key").strip()
 
     if verifyAPIKey(api_key):
-        if Flipnote.verifyKWZFilename(file_name):
+        if schema.verifyKWZFilename(file_name):
             # Fetch FSID from DB
             cur = connect(db_conn_string).cursor()
             cur.execute('''select json_agg(t) from (
@@ -170,3 +192,6 @@ async def flipnoteDownload(file_name, file_type):
             return makeResponse({"error": "The specified file name is invalid."}, 400)
     else:
         return makeResponse({"error": "The specified API key is invalid or incorrect."}, 401)
+
+
+loadAPIKeys()
