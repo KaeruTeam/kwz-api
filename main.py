@@ -6,33 +6,39 @@ from psycopg2 import connect
 
 from flipnote import schema
 
-# The path to the flipnotes file directory
-# File structure should be [base_file_path]/[fsid]/[file].[kwz|jpg]
-base_file_path = path.join("/home/meemo/dsi_library/")
-db_conn_string = "host=localhost port=5432 dbname=flipnotes user=api password=" + open("password.txt").read().strip()
-keys = []
+with open("config.json", "r", encoding="utf-8") as input_file:
+    config = loads(input_file.read())
+
+db_conn_string = "host={0} port={1} dbname={2} user={3} password={4}".format(config["db"]["host"],
+                                                                             config["db"]["port"],
+                                                                             config["db"]["dbname"],
+                                                                             config["db"]["user"],
+                                                                             config["db"]["password"])
+
 app = Flask(__name__)
+
+base_file_path = path.join(config["flipnotes_file_path"])
+
+keys = []
 
 
 # Read API keys from the text file
 def loadAPIKeys():
     global keys
-    keys = open("api_key.txt", "r").readlines()
+    keys = []
+    with open(path.join(config["api_keys_file"]), "r", encoding="utf-8") as file:
+        for key in file.readlines():
+            keys.append(key.strip())
 
 
 # Verifies that the API key is in the list
 def verifyAPIKey(input_key):
-    # Adding the newline so that `input_key in keys` works
-    input_key = str(input_key) + "\n"
-
     if input_key in keys:
         return True
     else:
         # Reload API keys list then check if the key is in the list again
-        # This way API keys can be added on the fly without restarting
-        # and IO is reduced since the file isn't loaded on every request
         loadAPIKeys()
-        return input_key in keys is True
+        return input_key in keys
 
 
 # Generates a response for flask containing necessary headers.
@@ -121,9 +127,7 @@ async def flipnoteMeta(file_name):
     if limit is not None:
         limit = int(limit)
     else:
-        # Arbitrarily high; no limit to result
-        # Setting to "all" had type errors with psycopg2
-        limit = 9999999999
+        limit = 9999999999  # Arbitrarily high; no limit
 
     offset = request.args.get("offset")
     if offset is not None:
@@ -170,7 +174,9 @@ async def flipnoteDownload(file_name, file_type):
             cur.close()
 
             if results is not None:
-                file_path = path.join(base_file_path, results[0]["current_fsid_ppm"], str(file_name + "." + file_type))
+                file_path = path.join(path.join(config["flipnotes_file_path"]),
+                                      results[0]["current_fsid_ppm"],
+                                      str(file_name + "." + file_type))
 
                 # Check that the file exists at the specified location
                 # In case the database and filesystem are out of sync
@@ -191,4 +197,8 @@ async def flipnoteDownload(file_name, file_type):
         return makeResponse({"error": "The specified API key is invalid or incorrect."}, 401)
 
 
-loadAPIKeys()
+if __name__ == "__main__":
+    print("This program is not designed to be run alone! Please check README.md")
+else:
+    # Load API keys when the file is loaded by uwsgi
+    loadAPIKeys()

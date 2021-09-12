@@ -1,0 +1,11 @@
+{
+  "db": {
+    "host": "localhost",
+    "port": "5432",
+    "dbname": "{change me}",
+    "user": "{change me}",
+    "password": "{change me}"
+  },
+  "flipnotes_file_path": "{change me}",
+  "api_keys_file": "api_keys.txt"
+}
