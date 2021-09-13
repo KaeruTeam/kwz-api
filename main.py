@@ -76,13 +76,6 @@ async def fsidFlipnotes(input_fsid):
 
     if verifyAPIKey(api_key):
         if schema.verifyPPMFSID(input_fsid):
-            # Kaeru team extra options request:
-            # - Add current/parent/root filename/fsid/username
-            # - Add created and modified timestamps
-            # - Sort asc modified timestamp
-            #   - also asc current filename for consistency
-            # - Limiting results: count x, offset y
-            # - Send number of results in an http header X-Total-Results
             if request.args.get("extra").lower() == "true":
                 cur = connect(db_conn_string).cursor()
                 cur.execute('''select json_agg(t) from (select
@@ -178,11 +171,9 @@ async def flipnoteDownload(file_name, file_type):
                                       results[0]["current_fsid_ppm"],
                                       str(file_name + "." + file_type))
 
-                # Check that the file exists at the specified location
-                # In case the database and filesystem are out of sync
+                # Check that the file exists in case the database
+                # contains meta on files not in the filesystem
                 if path.isfile(file_path):
-                    # Note: the thumbnail files could be deleted and instead be
-                    # extracted on the fly
                     if file_type == "kwz" or file_type == "jpg":
                         return send_file(file_path, as_attachment=True), 200
                     else:
@@ -198,7 +189,7 @@ async def flipnoteDownload(file_name, file_type):
 
 
 if __name__ == "__main__":
-    print("This program is not designed to be run alone! Please check README.md")
+    print("This program is not designed to be run on its own! Please check README.md")
 else:
     # Load API keys when the file is loaded by uwsgi
     loadAPIKeys()

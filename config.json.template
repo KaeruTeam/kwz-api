@@ -2,8 +2,8 @@
   "db": {
     "host": "localhost",
     "port": "5432",
-    "dbname": "{change me}",
-    "user": "{change me}",
+    "dbname": "dsi_library",
+    "user": "api",
     "password": "{change me}"
   },
   "flipnotes_file_path": "{change me}",
