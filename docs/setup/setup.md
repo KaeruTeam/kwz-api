@@ -3,13 +3,13 @@ This file contains instructions to set up the API from scratch.
 
 First, clone the repository:
 
-`git clone https://github.com/meemo/api.kwz.pw`
+`git clone https://github.com/meemo/kwz-api`
 
 And then `cd` into the directory:
 
-`cd api.kwz.pw/`
+`cd kwz-api/`
 
-The rest of this guide assumes that commands are run in this terminal that is in the `api.kwz.pw/` folder initially.
+The rest of this guide assumes that commands are run in this terminal that is in the `kwz-api/` folder initially.
 
 
 # Requirements
@@ -141,8 +141,8 @@ Below this directory should be all the FSID folders which contain the .kwz and .
 
 ### `uwsgi.ini.template`
 
-Both values should be replaced by the absolute path to the `api.kwz.pw` folder.
-For example, if `api.kwz.pw` is located in the home directory of `user`, replace each value with `/home/user/`.
+Both values should be replaced by the absolute path to the `kwz-api/` folder.
+For example, if `kwz-api/` is located in the home directory of `user`, replace each value with `/home/user/`.
 
 
 # Importing Flipnotes

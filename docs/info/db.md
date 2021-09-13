@@ -1,5 +1,5 @@
 # DSi Library DB Details
-This page details everything about the database table the for Flipnote Gallery: DSi Library flipnotes.
+This page details everything about the database table the for DSi Library flipnotes.
 
 # Columns
 
