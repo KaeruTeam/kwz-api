@@ -115,6 +115,11 @@ Note: Any text other than `True` (case-insensitive) will not enable this paramet
     - **Code**: `400` \
       Content: `{"error": "The specified file type is not supported."}`
 
+- **Problem**: the flipnote is not in the database, or it does not exist. \
+  Response:
+    - **Code**: `404` \
+      Content: `{"error": "Your request did not produce any results."}`
+
 
 ## Example Call
 #### Metadata

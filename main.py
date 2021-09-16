@@ -143,7 +143,10 @@ async def flipnoteMeta(file_name):
             results = dumps(cur.fetchone()[0], ensure_ascii=escapeUnicode)
             cur.close()
 
-            return makeResponse(results, 200)
+            if results != "null":
+                return makeResponse(results, 200)
+            else:
+                return makeResponse({"error": "Your request did not produce any results."}, 404)
         else:
             return makeResponse({"error": "The specified file name is invalid."}, 400)
     else:
