@@ -1,8 +1,8 @@
 [uwsgi]
 http-socket = :9090
-wsgi-file = {change me}/kwz-api/kwz-api.wsgi
+wsgi-file = kwz-api.wsgi
 processes = 4
 threads = 2
 stats = 127.0.0.1:9191
-logger = file:logfile={change me}/kwz-api/logs/uwsgi.log,maxsize=100000000
+logger = file:logfile=logs/kwz-api.log,maxsize=100000000
 wsgi-disable-file-wrapper = true

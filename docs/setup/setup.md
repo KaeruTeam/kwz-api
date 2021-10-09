@@ -139,11 +139,8 @@ Below this directory should be all the FSID folders which contain the .kwz and .
 
 `flipnote_path_path/{fsid}/{file name.(kwz|jpg)}`
 
-### `uwsgi.ini.template`
-
-Both values should be replaced by the absolute path to the `kwz-api/` folder.
-For example, if `kwz-api/` is located in the home directory of `user`, replace each value with `/home/user/`.
-
+### uwsgi.ini.template
+No values are required to be changed in this file, however if you would like to change the port, that can be configured on line 2.
 
 # Importing Flipnotes
 

@@ -26,15 +26,15 @@ This is your API key.
 
 This will escape non UTF-8 characters. For example, `ッ` will become `\u30c3` when `True` is passed. Any other text (including not specifying the argument) will not escape the characters.
 
-- `extra={True or False}`
+- `extra={True or False (case-insensitive)}`
 
-This adds the following things (a feature request from Kaeru):
+This flag changes the following:
 - Add current/parent/root filename/fsid/username
 - Add created and modified timestamps
 - Sort ascending by modified timestamp
    - also sort ascending by current filename for result consistency
 
-Note: Any text other than `True` (case-insensitive) will not enable this parameter.
+Note: Any text other than `True` will not enable these changes, including not specifying the parameter.
 
 - `limit={integer}`
 
@@ -44,7 +44,7 @@ This parameter limits the number of rows of results that are returned in the res
 
 This parameter begins the output rows with the given number as its index.
 
-Note: if an offset past the range of the output is specified, `Your request did not produce any results.` will be returned as shown below.
+Note: if an offset past the range of the output is specified, `Your request did not produce any results.` will be returned as, shown below.
 
 
 ## Response
