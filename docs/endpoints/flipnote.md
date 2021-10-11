@@ -121,7 +121,7 @@ Note: Any text other than `True` (case-insensitive) will not enable this paramet
       Content: `{"error": "Your request did not produce any results."}`
 
 
-## Example Call
+## Example Calls
 #### Metadata
 `/flipnote/ccccccccccccccjgv1kwwmhr1nvc/meta?key={API key}`
 
