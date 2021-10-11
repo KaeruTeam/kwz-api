@@ -62,7 +62,7 @@ Note: Any text other than `True` (case-insensitive) will not enable this paramet
         "frame_count":207,
         "frame_speed":7,
         "thumb_index":206,
-        "timestamp":1229556234,
+        "modified_timestamp":1229556234,
         "frame_flags_mask":0,
         "root_username":"にんてんどう",
         "root_fsid":"00000000000000000000",

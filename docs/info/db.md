@@ -2,7 +2,6 @@
 This page details everything about the database table the for DSi Library flipnotes.
 
 # Columns
-
 | Name | Type | Description |
 |---|---|---|
 | lock | boolean | If the flipnote is locked |
@@ -37,5 +36,4 @@ This page details everything about the database table the for DSi Library flipno
 | se3_digest | text |  |
 
 # Rows
-
 Each row represents 1 flipnote file from the DSi Library S3 bucket
