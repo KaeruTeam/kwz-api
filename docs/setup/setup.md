@@ -139,8 +139,20 @@ Below this directory should be all the FSID folders which contain the .kwz and .
 
 `flipnote_path_path/{fsid}/{file name.(kwz|jpg)}`
 
+After changing these values, rename the file to `config.json`:
+
+```shell
+mv config.json.template config.json
+```
+
 ### uwsgi.ini.template
-No values are required to be changed in this file, however if you would like to change the port, that can be configured on line 2.
+No values are required to be changed in this file, however if you would like to change the port to access the API, that can be configured on line 2.
+
+After changing (or not changing) any values, rename the file to `uwsgi.ini`:
+
+```shell
+mv uwsgi.ini.template uwsgi.ini
+```
 
 # Importing Flipnotes
 
