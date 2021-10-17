@@ -20,7 +20,7 @@ Other operating systems will in theory work, however no guide will be provided t
 All requirements and dependencies can be installed with the following commands:
 
 ```shell
-sudo apt install -y build-essential python3 python3-pip python3-dev postgresql
+sudo apt install -y build-essential postgresql python3 python3-pip python3-dev libpq-dev
 python3 -m pip install -r requirements.txt
 ```
 
