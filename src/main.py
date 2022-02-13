@@ -151,8 +151,10 @@ async def download_flipnote(file_name, file_type):
 
     # Fetch FSID from DB in order to create file path
     cur = connect(db_conn_string).cursor()
-    cur.execute('''select json_agg(t) from (select current_fsid_ppm from meta where current_filename = %s) t;''',
-                (file_name, ))
+    cur.execute('''select json_agg(t) from (
+                   select current_fsid_ppm from meta 
+                   where current_filename = %s
+                   ) t;''', (file_name, ))
     results = cur.fetchone()[0]
     cur.close()
 
@@ -170,6 +172,59 @@ async def download_flipnote(file_name, file_type):
 
     # All checks passed, return file
     return send_file(file_path, as_attachment=True), 200
+
+
+# Finds duplicate flipnotes from other conversion runs in the database based on the following:
+# - PPM format current, root, parent FSIDs
+#     - KWZ format FSIDs have changing prefix, we don't want to account for this
+# - Timestamp
+# - root + current usernames (NOT PARENT, they are incorrect on some revisions)
+# - frame count (just in case? idk)
+#
+# Return the current file names
+@app.route("/fdupes/<file_name>")
+async def find_dupes(file_name):
+    # Process arguments
+    file_name = str(file_name).strip()
+    api_key = str(request.args.get("key")).strip()
+
+    # Verify the API key is valid
+    if not verify_api_key(api_key, keys):
+        return make_response({"error": "The specified API key is invalid or incorrect."}, 401)
+
+    # Verify the flipnote name is valid
+    if not verifyKWZFilename(file_name):
+        return make_response({"error": "The specified file name is invalid."}, 400)
+
+    cur = connect(db_conn_string).cursor()
+    cur.execute('''select json_agg(t) from (
+                       select current_fsid_ppm, parent_fsid_ppm, root_fsid_ppm, 
+                       modified_timestamp, root_username, current_username, frame_count
+                       from meta where current_filename = %s
+                       ) t;''', (file_name,))
+    results = cur.fetchone()[0]
+    cur.close()
+
+    # Verify the DB returned any results
+    if results is None:
+        return make_response({"error": "The specified file does not exist."}, 404)
+    else:
+        results = results[0]
+
+    cur = connect(db_conn_string).cursor()
+    cur.execute('''select json_agg(t) from (
+                   select current_filename from meta 
+                   where current_fsid_ppm = %s and parent_fsid_ppm = %s and root_fsid_ppm = %s and 
+                   modified_timestamp = %s and root_username = %s  nd current_username = %s and frame_count = %s
+                   ) t;''', (results["current_fsid_ppm"], results["parent_fsid_ppm"], results["root_fsid_ppm"],
+                             results["modified_timestamp"],
+                             results["root_username"], results["current_username"],
+                             results["frame_count"]))
+    results = dumps(cur.fetchall()[0][0])
+    cur.close()
+
+    # All checks passed, return file
+    return make_response(results, 200)
 
 
 if __name__ == "__main__":
